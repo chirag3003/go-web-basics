@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/chirag3003/go-web/pkg/config"
 	"github.com/chirag3003/go-web/pkg/models"
 	"github.com/chirag3003/go-web/pkg/render"
-	"log"
 	"net/http"
 )
 
@@ -28,11 +28,13 @@ func NewHandlers(r *Repository) {
 func (m *Repository) Home(res http.ResponseWriter, req *http.Request) {
 	stringMap := make(map[string]string)
 	stringMap["test"] = "hello world"
+	remoteIP := req.RemoteAddr
+	m.App.Session.Put(req.Context(), "remote_ip", remoteIP)
 	render.RenderTemplate(res, "index", &models.TemplateData{
 		StringMap: stringMap,
 	})
 }
 func (m *Repository) About(res http.ResponseWriter, req *http.Request) {
-	log.Println("about")
-	res.Write([]byte(`{"page":"About"}`))
+	ip := m.App.Session.GetString(req.Context(), "remote_ip")
+	fmt.Fprintf(res, `{\"page\":\"%s\"}`, ip)
 }
